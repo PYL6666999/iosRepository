@@ -7,7 +7,7 @@
 
 import UIKit
 
-class Person: NSObject {
+class Person{
     var name: String
     var image: String
     
@@ -16,4 +16,5 @@ class Person: NSObject {
         self.name = name
         self.image = image
     }
+    
 }

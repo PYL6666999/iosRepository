@@ -25,7 +25,7 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
 //        present(picker, animated: true)
         
         let ac = UIAlertController(title: "Add Photo", message: "Choose a source", preferredStyle: .actionSheet)
-        print("hhhhh")
+        
         // 选项1：使用相机拍照
            ac.addAction(UIAlertAction(title: "Camera", style: .default) { [weak self] _ in
                self?.showImagePicker(sourceType: .camera)
@@ -61,46 +61,22 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
     func save() {
         if let saveData = try? NSKeyedArchiver.archivedData(withRootObject:people, requiringSecureCoding: false){
             let defaults = UserDefaults.standard
-            defaults.set(savedData, forKey: "people")
+            defaults.set(saveData, forKey: "people")
         }
     }
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        // Do any additional setup after loading the view.
-//        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addNewPerson))
-//        
-//        let defaults = UserDefaults.standard
-//        if let savedPeople = defaults.object(forKey: "people") as? Data {
-//            if let decodePeople = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(savedPeople) as? [Person] {
-//                people = decodedPeople
-//            }
-//        }
-//    }
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .add,
-            target: self,
-            action: #selector(addNewPerson)
-        )
+        // Do any additional setup after loading the view.
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addNewPerson))
         
         let defaults = UserDefaults.standard
-        
-        if let savedPeople = defaults.data(forKey: "people") {
-            // 用新API，支持多个类型
-            do {
-                if let decodedPeople = try NSKeyedUnarchiver.unarchivedObject(
-                    ofClasses: [NSArray.self, Person.self],
-                    from: savedPeople
-                ) as? [Person] {
-                    people = decodedPeople
-                }
-            } catch {
-                print("Failed to load people: \(error)")
+        if let savedPeople = defaults.object(forKey: "people") as? Data {
+            if let decodePeople = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(savedPeople) as? [Person] {
+                people = decodePeople
             }
         }
     }
+    
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return people.count
@@ -131,7 +107,6 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         
         let person = Person(name: "Unknown", image: imageName)
         people.append(person)
-        save()
         collectionView.reloadData()
         dismiss(animated: true)
         
@@ -172,7 +147,6 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
             renameAC.addAction(UIAlertAction(title: "OK", style: .default) { [weak self, weak renameAC] _ in
                 guard let newName = renameAC?.textFields?[0].text else { return }
                 person.name = newName
-                self?.save()
                 self?.collectionView.reloadData()
             })
             renameAC.addAction(UIAlertAction(title: "Cancel", style: .cancel))
