@@ -59,9 +59,12 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
     }
     
     func save() {
-        if let saveData = try? NSKeyedArchiver.archivedData(withRootObject:people, requiringSecureCoding: false){
+       let jsonEncoder = JSONEncoder()
+        if let savedData = try? jsonEncoder.encode(people) {
             let defaults = UserDefaults.standard
             defaults.set(savedData, forKey: "people")
+        } else {
+            print("Failed to save people")
         }
     }
 //    override func viewDidLoad() {
@@ -87,17 +90,27 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         
         let defaults = UserDefaults.standard
         
-        if let savedPeople = defaults.data(forKey: "people") {
-            // 用新API，支持多个类型
+//        if let savedPeople = defaults.data(forKey: "people") {
+//            // 用新API，支持多个类型
+//            do {
+//                if let decodedPeople = try NSKeyedUnarchiver.unarchivedObject(
+//                    ofClasses: [NSArray.self, Person.self],
+//                    from: savedPeople
+//                ) as? [Person] {
+//                    people = decodedPeople
+//                }
+//            } catch {
+//                print("Failed to load people: \(error)")
+//            }
+//        }
+        
+        if let savedPeople = defaults.object(forKey: "people") as? Data {
+            let jsonDecoder = JSONDecoder()
+            
             do {
-                if let decodedPeople = try NSKeyedUnarchiver.unarchivedObject(
-                    ofClasses: [NSArray.self, Person.self],
-                    from: savedPeople
-                ) as? [Person] {
-                    people = decodedPeople
-                }
+                people = try jsonDecoder.decode([Person].self, from: savedPeople)
             } catch {
-                print("Failed to load people: \(error)")
+                print("Failed to load people")
             }
         }
     }
